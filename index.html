@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Anjay</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap');
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f9f7f1;
+      color: #5a5766;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #edc7b7;
+      padding: 15px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    header h1 {
+      font-weight: 500;
+      font-size: 1.8rem;
+      color: #4a3c31;
+      letter-spacing: 1.2px;
+      user-select: none;
+    }
+    main {
+      flex-grow: 1;
+      padding: 15px 20px;
+      max-width: 350px;
+      margin: 0 auto;
+      width: 100%;
+      overflow-y: auto;
+    }
+    form.upload-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    form.upload-form label {
+      font-weight: 500;
+      font-size: 1rem;
+      color: #4a3c31;
+    }
+    input[type="file"] {
+      border: 2px dashed #d9b08c;
+      background: #f4e1d2;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    input[type="file"]:hover {
+      border-color: #edc7b7;
+    }
+    button.upload-btn {
+      background: #edc7b7;
+      border: none;
+      padding: 12px 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      color: #5a4431;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(237,199,183,0.5);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    button.upload-btn:hover {
+      background: #d8a78e;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+      gap: 15px;
+    }
+    .photo-card {
+      background: #fff1e6;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    .photo-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+    .photo-card img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: 12px;
+      aspect-ratio: 1 / 1;
+    }
+    .photo-card .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255,0.85);
+      border: none;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #9b6161;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
+      line-height: 1;
+      user-select: none;
+    }
+    .photo-card .delete-btn:hover {
+      opacity: 1;
+      color: #6b3a3a;
+    }
+    footer {
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #b3a29e;
+      background: #f5ebe0;
+      user-select: none;
+    }
+
+    /* Mobile friendly scroll + max size fitting */
+    main {
+      max-height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cihuy kan dulu</h1>
+  </header>
+  <main>
+    <form class="upload-form" id="uploadForm">
+      <label for="photoInput">Xin Gallery</label>
+      <input type="file" accept="image/*" id="photoInput" multiple />
+      <button type="submit" class="upload-btn">Upload Photos</button>
+    </form>
+    <section class="gallery" id="gallery" aria-live="polite" aria-label="Photo gallery">
+      <!-- Photos will appear here -->
+    </section>
+  </main>
+  <footer>
+    &copy; 2024 My Aesthetic Gallery
+  </footer>
+
+<script>
+  // Helper: Load saved photos from localStorage
+  function loadPhotos() {
+    const stored = localStorage.getItem('aestheticPhotos');
+    if (!stored) return [];
+    try {
+      return JSON.parse(stored);
+    } catch(e) {
+      return [];
+    }
+  }
+
+  // Helper: Save photos array to localStorage
+  function savePhotos(photos) {
+    localStorage.setItem('aestheticPhotos', JSON.stringify(photos));
+  }
+
+  // Render gallery photos
+  function renderGallery() {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = '';
+    const photos = loadPhotos();
+    if(photos.length === 0) {
+      gallery.innerHTML = '<p style="color:#b3a29e; font-style: italic; text-align:center;">Your gallery is empty. Add some photos!</p>';
+      return;
+    }
+    photos.forEach((photo, index) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card';
+      card.setAttribute('tabindex','0');
+      card.setAttribute('aria-label', 'Photo ' + (index + 1));
+      const img = document.createElement('img');
+      img.src = photo;
+      img.alt = 'Gallery photo ' + (index + 1);
+      const btn = document.createElement('button');
+      btn.className = 'delete-btn';
+      btn.textContent = '×';
+      btn.setAttribute('aria-label', 'Delete photo ' + (index + 1));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePhoto(index);
+      });
+      card.appendChild(img);
+      card.appendChild(btn);
+      gallery.appendChild(card);
+    });
+  }
+
+  // Remove photo by index
+  function removePhoto(idx) {
+    let photos = loadPhotos();
+    photos.splice(idx,1);
+    savePhotos(photos);
+    renderGallery();
+  }
+
+  // Handle upload form submit
+  document.getElementById('uploadForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('photoInput');
+    const files = input.files;
+    if (!files.length) {
+      alert('Please select at least one photo to upload.');
+      return;
+    }
+    const photos = loadPhotos();
+
+    // Read each file as a data URL and store
+    const promises = [];
+    for (let i = 0; i < files.length; i++) {
+      if(!files[i].type.startsWith('image/')) continue;
+      promises.push(new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(ev.target.result);
+        reader.onerror = () => reject('Error reading file');
+        reader.readAsDataURL(files[i]);
+      }));
+    }
+
+    Promise.all(promises).then(images => {
+      const updatedPhotos = photos.concat(images);
+      savePhotos(updatedPhotos);
+      renderGallery();
+      input.value = '';
+    }).catch(() => {
+      alert('Error uploading one or more photos.');
+    });
+  });
+
+  // Initial render on page load
+  window.addEventListener('DOMContentLoaded', renderGallery);
+</script>
+</body>
+</html>
+
